@@ -1,0 +1,139 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: maven-component-selector
+  title: Maven Component Selector
+  description: |
+    Browse and select Maven-tagged components from the software catalog.
+    Use this template to discover components, pick the ones you need,
+    and get a consolidated summary with links.
+  tags:
+    - maven
+    - catalog
+    - utility
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+spec:
+  owner: group:rhdh
+  type: utility
+
+  parameters:
+    - title: Select Maven Components
+      description: >
+        All components below are tagged **maven** in the catalog.
+        Pick your primary component plus any additional ones you need.
+      required:
+        - primaryComponent
+      properties:
+        primaryComponent:
+          title: Primary Maven Component
+          description: Choose the main Maven component to work with
+          type: string
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: Component
+                metadata.tags: maven
+            defaultKind: Component
+            defaultNamespace: default
+            allowArbitraryValues: false
+
+        additionalComponents:
+          title: Additional Maven Components
+          description: Optionally pick more Maven components (click + to add more)
+          type: array
+          items:
+            type: string
+            ui:field: EntityPicker
+            ui:options:
+              catalogFilter:
+                - kind: Component
+                  metadata.tags: maven
+              defaultKind: Component
+              defaultNamespace: default
+              allowArbitraryValues: false
+          ui:options:
+            addable: true
+            removable: true
+            orderable: false
+
+    - title: About Your Selection
+      properties:
+        purpose:
+          title: Purpose
+          description: Why are you selecting these components?
+          type: string
+          ui:widget: textarea
+          ui:options:
+            rows: 4
+          ui:placeholder: |
+            E.g. "Setting up a local dev environment for the payment and
+            checkout services to investigate a performance regression..."
+
+        environment:
+          title: Target Environment
+          description: Where will you be working with these components?
+          type: string
+          default: development
+          ui:widget: radio
+          enum:
+            - development
+            - staging
+            - production
+          enumNames:
+            - "🛠  Development"
+            - "🧪  Staging"
+            - "🚀  Production"
+
+        requestedBy:
+          title: Requested By
+          description: Who is requesting this (optional)
+          type: string
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: User
+            defaultKind: User
+
+  steps:
+    - id: log-selection
+      name: Summarise Selection
+      action: debug:log
+      input:
+        message: |
+          ✅ Maven Component Selection
+          ─────────────────────────────
+          Primary component  : ${{ parameters.primaryComponent }}
+          Additional         : ${{ parameters.additionalComponents | dump }}
+          Environment        : ${{ parameters.environment }}
+          Requested by       : ${{ parameters.requestedBy }}
+
+          Purpose:
+          ${{ parameters.purpose }}
+
+  output:
+    text:
+      - title: "✅ Selection Summary"
+        content: |
+          ## Selected Maven Components
+
+          | Role | Component |
+          |------|-----------|
+          | **Primary** | `${{ parameters.primaryComponent }}` |
+          ${% for c in parameters.additionalComponents %}| Additional | `${{ c }}` |
+          ${% endfor %}
+
+          ---
+
+          **Environment:** ${{ parameters.environment }}
+
+          **Purpose:**
+          > ${{ parameters.purpose }}
+
+          ---
+          _Head to the Catalog links below to inspect each component._
+
+    links:
+      - title: "View Primary Component in Catalog"
+        icon: catalog
+        url: "/catalog/${{ parameters.primaryComponent | replace(':', '/') }}"
