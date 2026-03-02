@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: banking-team
+  description: Team responsible for banking systems and financial services
+  tags:
+    - banking
+    - finance
+spec:
+  type: team
+  profile:
+    displayName: Banking Team
+  parent: banking-team
+  children: []

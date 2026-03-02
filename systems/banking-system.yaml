@@ -14,5 +14,5 @@ metadata:
       title: Banking Documentation
       icon: docs
 spec:
-  owner: group:default/platform-team
+  owner: group:default/banking-team
   domain: finance

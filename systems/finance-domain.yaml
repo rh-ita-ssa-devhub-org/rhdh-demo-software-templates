@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: finance
+  description: Domain encompassing all financial systems and services
+  tags:
+    - finance
+    - banking
+spec:
+  owner: group:default/banking-team
