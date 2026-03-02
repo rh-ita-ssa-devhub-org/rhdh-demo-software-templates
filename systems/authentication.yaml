@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: authentication
+  description: Authentication service for banking system users
+  tags:
+    - banking
+    - home-banking
+    - finance
+    - security
+    - auth
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://example.com/auth-docs
+      title: Authentication Documentation
+      icon: docs
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/platform-team
+  system: banking-system

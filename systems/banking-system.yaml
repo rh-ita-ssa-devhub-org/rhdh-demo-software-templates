@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: banking-system
+  description: Core banking system for home banking and financial services
+  tags:
+    - banking
+    - home-banking
+    - finance
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://example.com/banking-docs
+      title: Banking Documentation
+      icon: docs
+spec:
+  owner: group:default/platform-team
+  domain: finance
