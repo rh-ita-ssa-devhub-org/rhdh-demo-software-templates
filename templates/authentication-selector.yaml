@@ -1,0 +1,58 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: authentication-selector
+  title: Authentication Component Selector
+  description: |
+    Browse the software catalog for components tagged with **authentication**
+    and select one to work with.
+  tags:
+    - authentication
+    - catalog
+    - utility
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+spec:
+  owner: group:default/banking-team
+  type: utility
+
+  parameters:
+    - title: Select an Authentication Component
+      description: >
+        All entries below are tagged **authentication** in the catalog.
+        Pick the component you want to work with.
+      required:
+        - authComponent
+      properties:
+        authComponent:
+          title: Authentication Component
+          description: Choose an authentication component from the catalog
+          type: string
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - metadata.tags: authentication
+            defaultKind: Component
+            defaultNamespace: default
+            allowArbitraryValues: false
+
+  steps:
+    - id: log-selection
+      name: Log Selected Component
+      action: debug:log
+      input:
+        message: |
+          Selected authentication component: ${{ parameters.authComponent }}
+
+  output:
+    text:
+      - title: "Selected Authentication Component"
+        content: |
+          ## Authentication Component
+
+          You selected: `${{ parameters.authComponent }}`
+
+    links:
+      - title: "View Component in Catalog"
+        icon: catalog
+        url: "/catalog/${{ parameters.authComponent | replace(':', '/') }}"
