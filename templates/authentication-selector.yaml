@@ -31,7 +31,8 @@ spec:
           ui:field: EntityPicker
           ui:options:
             catalogFilter:
-              - metadata.tags: authentication
+              - kind: Component
+                metadata.tags: authentication
             defaultKind: Component
             defaultNamespace: default
             allowArbitraryValues: false
