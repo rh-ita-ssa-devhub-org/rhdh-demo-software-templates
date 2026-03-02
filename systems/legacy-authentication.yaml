@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: sso-authentication
+  name: legacy-authentication
   description: Authentication service for banking system users
   tags:
     - banking
@@ -14,6 +14,7 @@ metadata:
     - keycloak
     - sso
     - authentication
+    - legacy
   annotations:
     backstage.io/techdocs-ref: dir:.
   links:
