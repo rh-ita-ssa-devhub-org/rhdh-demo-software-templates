@@ -47,10 +47,6 @@ spec:
         Choose the database engine and configure its connection properties.
       required:
         - database
-        - dbHost
-        - dbPort
-        - dbName
-        - dbUser
       properties:
         database:
           title: Database Engine
@@ -65,41 +61,104 @@ spec:
             - "PostgreSQL"
             - "MongoDB"
 
-        dbHost:
-          title: Database Host
-          description: Hostname or IP address of the database server
-          type: string
-          default: localhost
+      dependencies:
+        database:
+          oneOf:
+            - properties:
+                database:
+                  const: postgresql
+                pgHost:
+                  title: Host
+                  description: Hostname or IP of the PostgreSQL server
+                  type: string
+                  default: localhost
+                pgPort:
+                  title: Port
+                  description: PostgreSQL port
+                  type: integer
+                  default: 5432
+                pgDatabase:
+                  title: Database Name
+                  description: Name of the PostgreSQL database
+                  type: string
+                pgUser:
+                  title: Username
+                  description: PostgreSQL user
+                  type: string
+                pgPassword:
+                  title: Password
+                  description: PostgreSQL password
+                  type: string
+                  ui:widget: password
+                pgPoolSize:
+                  title: Connection Pool Size
+                  description: Maximum number of connections in the pool
+                  type: integer
+                  default: 10
+                  ui:help: "Recommended range: 5–50"
+                pgSslMode:
+                  title: SSL Mode
+                  description: PostgreSQL SSL connection mode
+                  type: string
+                  default: require
+                  enum:
+                    - disable
+                    - require
+                    - verify-ca
+                    - verify-full
+                  enumNames:
+                    - "Disable"
+                    - "Require"
+                    - "Verify CA"
+                    - "Verify Full"
+                pgSchema:
+                  title: Schema
+                  description: PostgreSQL schema to use (default is public)
+                  type: string
+                  default: public
+              required:
+                - pgHost
+                - pgDatabase
+                - pgUser
 
-        dbPort:
-          title: Database Port
-          description: Port the database listens on
-          type: integer
-          default: 5432
-          ui:help: "Default: 5432 for PostgreSQL, 27017 for MongoDB"
-
-        dbName:
-          title: Database Name
-          description: Name of the database / collection namespace
-          type: string
-
-        dbUser:
-          title: Database User
-          description: Username used to connect to the database
-          type: string
-
-        dbPoolSize:
-          title: Connection Pool Size
-          description: Maximum number of connections in the pool
-          type: integer
-          default: 10
-          ui:help: "Recommended range: 5–50"
-
-        dbSslEnabled:
-          title: Enable SSL/TLS
-          description: Enforce encrypted connections to the database
-          type: boolean
-          default: true
+            - properties:
+                database:
+                  const: mongodb
+                mongoConnectionString:
+                  title: Connection String
+                  description: Full MongoDB connection URI (e.g. mongodb://host:27017)
+                  type: string
+                  default: mongodb://localhost:27017
+                mongoDatabase:
+                  title: Database Name
+                  description: Name of the MongoDB database
+                  type: string
+                mongoUser:
+                  title: Username
+                  description: MongoDB user (leave empty if using connection string auth)
+                  type: string
+                mongoPassword:
+                  title: Password
+                  description: MongoDB password
+                  type: string
+                  ui:widget: password
+                mongoAuthSource:
+                  title: Auth Source
+                  description: Database used to authenticate the user
+                  type: string
+                  default: admin
+                mongoReplicaSet:
+                  title: Replica Set Name
+                  description: Name of the replica set (leave empty for standalone)
+                  type: string
+                mongoTlsEnabled:
+                  title: Enable TLS
+                  description: Enforce TLS encryption for MongoDB connections
+                  type: boolean
+                  default: true
+              required:
+                - mongoConnectionString
+                - mongoDatabase
 
     - title: Runtime Configuration
       description: >
@@ -211,11 +270,20 @@ spec:
 
           -- Database --
           Engine         : ${{ parameters.database }}
-          Host           : ${{ parameters.dbHost }}:${{ parameters.dbPort }}
-          Database Name  : ${{ parameters.dbName }}
-          User           : ${{ parameters.dbUser }}
-          Pool Size      : ${{ parameters.dbPoolSize }}
-          SSL Enabled    : ${{ parameters.dbSslEnabled }}
+          ${% if parameters.database === 'postgresql' %}
+          Host           : ${{ parameters.pgHost }}:${{ parameters.pgPort }}
+          Database       : ${{ parameters.pgDatabase }}
+          User           : ${{ parameters.pgUser }}
+          Schema         : ${{ parameters.pgSchema }}
+          Pool Size      : ${{ parameters.pgPoolSize }}
+          SSL Mode       : ${{ parameters.pgSslMode }}
+          ${% else %}
+          Connection     : ${{ parameters.mongoConnectionString }}
+          Database       : ${{ parameters.mongoDatabase }}
+          Auth Source    : ${{ parameters.mongoAuthSource }}
+          Replica Set    : ${{ parameters.mongoReplicaSet }}
+          TLS Enabled    : ${{ parameters.mongoTlsEnabled }}
+          ${% endif %}
 
           -- Runtime --
           Framework      : ${{ parameters.runtime }}
@@ -238,9 +306,21 @@ spec:
           | Setting | Value |
           |---------|-------|
           | **Auth Component** | `${{ parameters.authComponent }}` |
-          | **Database** | ${{ parameters.database }} @ `${{ parameters.dbHost }}:${{ parameters.dbPort }}/${{ parameters.dbName }}` |
-          | **SSL** | ${{ parameters.dbSslEnabled }} |
-          | **Pool Size** | ${{ parameters.dbPoolSize }} |
+          | **Database** | ${{ parameters.database }} |
+          ${% if parameters.database === 'postgresql' %}
+          | **Host** | `${{ parameters.pgHost }}:${{ parameters.pgPort }}` |
+          | **Database Name** | `${{ parameters.pgDatabase }}` |
+          | **User** | ${{ parameters.pgUser }} |
+          | **Schema** | ${{ parameters.pgSchema }} |
+          | **Pool Size** | ${{ parameters.pgPoolSize }} |
+          | **SSL Mode** | ${{ parameters.pgSslMode }} |
+          ${% else %}
+          | **Connection String** | `${{ parameters.mongoConnectionString }}` |
+          | **Database Name** | `${{ parameters.mongoDatabase }}` |
+          | **Auth Source** | ${{ parameters.mongoAuthSource }} |
+          | **Replica Set** | ${{ parameters.mongoReplicaSet or '—' }} |
+          | **TLS** | ${{ parameters.mongoTlsEnabled }} |
+          ${% endif %}
           | **Runtime** | ${{ parameters.runtime }} |
           | **Java** | ${{ parameters.javaVersion }} |
           | **Build Tool** | ${{ parameters.buildTool }} |
