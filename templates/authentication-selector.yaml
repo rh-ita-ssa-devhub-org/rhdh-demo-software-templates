@@ -28,14 +28,19 @@ spec:
           title: Authentication Component
           description: Choose an authentication component from the catalog
           type: string
-          ui:field: EntityPicker
-          ui:options:
-            catalogFilter:
-              - kind: Component
-                metadata.tags: authentication
-            defaultKind: Component
-            defaultNamespace: default
-            allowArbitraryValues: false
+          default: component:default/authentication
+          ui:widget: radio
+          oneOf:
+            - const: component:default/authentication
+              title: "Authentication Service"
+              description: >
+                Current production authentication service. Supports OAuth 2.0,
+                OpenID Connect and SSO via Keycloak. Actively maintained.
+            - const: component:default/legacy-authentication
+              title: "Legacy Authentication Service"
+              description: >
+                Previous generation authentication service. Supports basic OAuth 2.0.
+                Scheduled for deprecation — use only for backward-compatibility scenarios.
 
     - title: Database Configuration
       description: >
