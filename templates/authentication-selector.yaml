@@ -85,11 +85,6 @@ spec:
                   title: Username
                   description: PostgreSQL user
                   type: string
-                pgPassword:
-                  title: Password
-                  description: PostgreSQL password
-                  type: string
-                  ui:widget: password
                 pgPoolSize:
                   title: Connection Pool Size
                   description: Maximum number of connections in the pool
@@ -137,11 +132,6 @@ spec:
                   title: Username
                   description: MongoDB user (leave empty if using connection string auth)
                   type: string
-                mongoPassword:
-                  title: Password
-                  description: MongoDB password
-                  type: string
-                  ui:widget: password
                 mongoAuthSource:
                   title: Auth Source
                   description: Database used to authenticate the user
