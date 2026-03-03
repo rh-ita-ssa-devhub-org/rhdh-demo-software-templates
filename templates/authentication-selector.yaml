@@ -2,7 +2,7 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: authentication-selector
-  title: Authentication Component Selector
+  title: Banking Application
   description: |
     Browse the software catalog for components tagged with **authentication**
     and select one to work with.
@@ -37,21 +37,220 @@ spec:
             defaultNamespace: default
             allowArbitraryValues: false
 
+    - title: Database Configuration
+      description: >
+        Choose the database engine and configure its connection properties.
+      required:
+        - database
+        - dbHost
+        - dbPort
+        - dbName
+        - dbUser
+      properties:
+        database:
+          title: Database Engine
+          description: Select the database to use for this service
+          type: string
+          default: postgresql
+          ui:widget: radio
+          enum:
+            - postgresql
+            - mongodb
+          enumNames:
+            - "PostgreSQL"
+            - "MongoDB"
+
+        dbHost:
+          title: Database Host
+          description: Hostname or IP address of the database server
+          type: string
+          default: localhost
+
+        dbPort:
+          title: Database Port
+          description: Port the database listens on
+          type: integer
+          default: 5432
+          ui:help: "Default: 5432 for PostgreSQL, 27017 for MongoDB"
+
+        dbName:
+          title: Database Name
+          description: Name of the database / collection namespace
+          type: string
+
+        dbUser:
+          title: Database User
+          description: Username used to connect to the database
+          type: string
+
+        dbPoolSize:
+          title: Connection Pool Size
+          description: Maximum number of connections in the pool
+          type: integer
+          default: 10
+          ui:help: "Recommended range: 5–50"
+
+        dbSslEnabled:
+          title: Enable SSL/TLS
+          description: Enforce encrypted connections to the database
+          type: boolean
+          default: true
+
+    - title: Runtime Configuration
+      description: >
+        Choose the backend runtime framework for the authentication service.
+      required:
+        - runtime
+      properties:
+        runtime:
+          title: Runtime Framework
+          description: Select the backend runtime to use
+          type: string
+          default: quarkus
+          ui:widget: radio
+          enum:
+            - quarkus
+            - springboot
+          enumNames:
+            - "Quarkus"
+            - "Spring Boot"
+
+        javaVersion:
+          title: Java Version
+          description: Java version to build and run the service with
+          type: string
+          default: "21"
+          enum:
+            - "17"
+            - "21"
+          enumNames:
+            - "Java 17 (LTS)"
+            - "Java 21 (LTS)"
+
+        buildTool:
+          title: Build Tool
+          description: Build tool to use for the project
+          type: string
+          default: maven
+          ui:widget: radio
+          enum:
+            - maven
+            - gradle
+          enumNames:
+            - "Maven"
+            - "Gradle"
+
+        nativeCompile:
+          title: Native Compilation (GraalVM)
+          description: Compile to a native binary using GraalVM (Quarkus only)
+          type: boolean
+          default: false
+
+    - title: Frontend Deployment (Optional)
+      description: >
+        Optionally deploy a frontend for this authentication service.
+        Leave **Deploy Frontend** unchecked to skip this section.
+      properties:
+        deployFrontend:
+          title: Deploy Frontend
+          description: Enable to configure and deploy a frontend application
+          type: boolean
+          default: false
+
+        frontendFramework:
+          title: Frontend Framework
+          description: Framework to use for the frontend (required if deploying frontend)
+          type: string
+          default: react
+          enum:
+            - react
+            - angular
+            - vue
+          enumNames:
+            - "React"
+            - "Angular"
+            - "Vue"
+          ui:options:
+            conditional: deployFrontend
+
+        expectedUsers:
+          title: Expected Number of Users
+          description: Estimated concurrent users — used to size the frontend replicas
+          type: integer
+          default: 100
+          minimum: 1
+          maximum: 100000
+          ui:help: "Used to auto-calculate replica count and resource requests"
+          ui:options:
+            conditional: deployFrontend
+
+        frontendReplicas:
+          title: Frontend Replicas
+          description: Number of frontend pod replicas to deploy
+          type: integer
+          default: 2
+          minimum: 1
+          maximum: 20
+          ui:options:
+            conditional: deployFrontend
+
   steps:
     - id: log-selection
-      name: Log Selected Component
+      name: Log Configuration
       action: debug:log
       input:
         message: |
-          Selected authentication component: ${{ parameters.authComponent }}
+          === Authentication Service Configuration ===
+
+          Auth Component : ${{ parameters.authComponent }}
+
+          -- Database --
+          Engine         : ${{ parameters.database }}
+          Host           : ${{ parameters.dbHost }}:${{ parameters.dbPort }}
+          Database Name  : ${{ parameters.dbName }}
+          User           : ${{ parameters.dbUser }}
+          Pool Size      : ${{ parameters.dbPoolSize }}
+          SSL Enabled    : ${{ parameters.dbSslEnabled }}
+
+          -- Runtime --
+          Framework      : ${{ parameters.runtime }}
+          Java Version   : ${{ parameters.javaVersion }}
+          Build Tool     : ${{ parameters.buildTool }}
+          Native Compile : ${{ parameters.nativeCompile }}
+
+          -- Frontend --
+          Deploy         : ${{ parameters.deployFrontend }}
+          Framework      : ${{ parameters.frontendFramework if parameters.deployFrontend else 'N/A' }}
+          Expected Users : ${{ parameters.expectedUsers if parameters.deployFrontend else 'N/A' }}
+          Replicas       : ${{ parameters.frontendReplicas if parameters.deployFrontend else 'N/A' }}
 
   output:
     text:
-      - title: "Selected Authentication Component"
+      - title: "Configuration Summary"
         content: |
-          ## Authentication Component
+          ## Authentication Service Configuration
 
-          You selected: `${{ parameters.authComponent }}`
+          | Setting | Value |
+          |---------|-------|
+          | **Auth Component** | `${{ parameters.authComponent }}` |
+          | **Database** | ${{ parameters.database }} @ `${{ parameters.dbHost }}:${{ parameters.dbPort }}/${{ parameters.dbName }}` |
+          | **SSL** | ${{ parameters.dbSslEnabled }} |
+          | **Pool Size** | ${{ parameters.dbPoolSize }} |
+          | **Runtime** | ${{ parameters.runtime }} |
+          | **Java** | ${{ parameters.javaVersion }} |
+          | **Build Tool** | ${{ parameters.buildTool }} |
+          | **Native Compile** | ${{ parameters.nativeCompile }} |
+
+          ${% if parameters.deployFrontend %}
+          ### Frontend
+          | Setting | Value |
+          |---------|-------|
+          | **Framework** | ${{ parameters.frontendFramework }} |
+          | **Expected Users** | ${{ parameters.expectedUsers }} |
+          | **Replicas** | ${{ parameters.frontendReplicas }} |
+          ${% else %}
+          > _Frontend deployment was not selected._
+          ${% endif %}
 
     links:
       - title: "View Component in Catalog"

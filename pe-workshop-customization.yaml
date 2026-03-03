@@ -104,15 +104,11 @@ upstream:
       # --- ADOPTION INSIGHTS ---
         analytics:
           adoptionInsights:
-            licensedUsers: 15 
+            licensedUsers: 35 
       # --- ADOPTION INSIGHTS ---
 
       ## --- AUTHENTICATION ---
-      ## This is a development and testing authentication configuration
-      auth:
-        providers:
-          guest:
-            dangerouslyAllowOutsideDevelopment: true
+      
       ## Configuration required to enable OpenID Connect authentication
       auth:
         session:
@@ -165,7 +161,7 @@ upstream:
             token: ${GITLAB_TOKEN}
       catalog:
         rules:
-          - allow: [Component, System, API, Resource, Location, Template, Domain]
+            - allow: [Component, System, API, Resource, Location, Template, Domain, Group, User]
         locations: []
         providers:
 
@@ -252,15 +248,15 @@ upstream:
             apiVersion: 'v1beta1'
             plural: 'taskruns'
       ## --- RBAC --- #
-      # permission:
-      #   enabled: true
-      #   rbac:
-      #     admin:
-      #       users:
-      #         - name: user:default/pe1
-      #         - name: user:default/pe2
-      #     policies-csv-file: ./rbac/rbac-policy.csv
-      #     conditionalPoliciesFile: ./rbac/rbac-conditional-policies.yaml
+      permission:
+        enabled: true
+        rbac:
+          admin:
+            users:
+              - name: user:default/pe1
+              - name: user:default/pe2
+          policies-csv-file: ./rbac/rbac-policy.csv
+          conditionalPoliciesFile: ./rbac/rbac-conditional-policies.yaml
       ## --- RBAC --- #
 
     extraEnvVars:
