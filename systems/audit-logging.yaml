@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: audit-logger
+  description: Standard audit logger
+  tags:
+    - banking
+    - home-banking
+    - finance
+    - security
+    - logging
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://example.com/auth-docs
+      title: Authentication Documentation
+      icon: docs
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/banking-team
+  system: banking-system
