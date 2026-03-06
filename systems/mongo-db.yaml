@@ -1,0 +1,17 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mongo-db
+  title: MongoDB Database
+  description: MongoDB database service
+  tags:
+    - mongodb
+    - database
+    - nosql
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: database
+  lifecycle: production
+  owner: group:default/banking-team
+  system: banking-system
